@@ -1,0 +1,14 @@
+# Se descarga o se genera solo
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Secretos: contraseñas y configuración de cada entorno
+.env
+.env.*
+!.env.example
+
+# Registros y editor
+*.log
+.vscode/
