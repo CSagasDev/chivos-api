@@ -1,0 +1,35 @@
+# Entorno local: la API y un Postgres solo para tu laptop.
+# En el servidor no se usa: ahí lo hace Dokploy.
+
+services:
+  api:
+    build: .                      # construye con el Dockerfile de esta carpeta
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      PORT: 3000
+      # La API la va a leer cuando se conecte a la base.
+      # "db" es el nombre del servicio de abajo: así se encuentran las cajas.
+      DATABASE_URL: postgres://chivos:chivos@db:5432/chivos_local
+    depends_on:
+      db:
+        condition: service_healthy   # espera a que la base esté lista
+
+  db:
+    image: postgres:18            # la misma versión que en el servidor
+    environment:
+      POSTGRES_USER: chivos
+      POSTGRES_PASSWORD: chivos   # solo existe en tu laptop; las de verdad van en Dokploy
+      POSTGRES_DB: chivos_local
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql   # los datos sobreviven al apagar
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chivos -d chivos_local"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  db-data:
