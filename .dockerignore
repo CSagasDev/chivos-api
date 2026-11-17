@@ -1,0 +1,10 @@
+# Se genera adentro de la caja, no se copia de la laptop
+node_modules
+dist
+coverage
+
+# Adentro no sirve, o no debe estar
+.git
+.env
+.env.*
+*.log
