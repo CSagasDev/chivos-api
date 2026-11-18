@@ -5,7 +5,7 @@ RUN npm install -g pnpm@12.21.0
 
 # Primero solo la lista de dependencias, y se instalan.
 # Si no cambió, Docker reusa este paso y no vuelve a descargar todo.
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # Después el código, y se compila a JavaScript (sale en dist/)

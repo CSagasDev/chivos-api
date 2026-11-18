@@ -8,6 +8,7 @@ services:
       - "127.0.0.1:3000:3000"
     environment:
       PORT: 3000
+      SWAGGER: "true"
       # La API la va a leer cuando se conecte a la base.
       # "db" es el nombre del servicio de abajo: así se encuentran las cajas.
       DATABASE_URL: postgres://chivos:chivos@db:5432/chivos_local
