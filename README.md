@@ -1,132 +1,206 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+<div align="center">
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+# 🐄 Bovigest API
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+**El backend de Bovigest: el control de una finca ganadera, desde la parcela
+hasta cada cabeza de ganado.**
 
-## Description
+[![versión](https://img.shields.io/github/v/tag/CSagasDev/chivos-api?label=versi%C3%B3n&color=2ea44f)](https://github.com/CSagasDev/chivos-api/tags)
+[![producción](https://img.shields.io/website?url=https%3A%2F%2Fbovigest-api.datosystems.dev%2Fhealth&label=producci%C3%B3n&up_message=en%20l%C3%ADnea&down_message=ca%C3%ADda)](https://bovigest-api.datosystems.dev)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+![NestJS](https://img.shields.io/badge/NestJS-12-E0234E?logo=nestjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-26-5FA04E?logo=nodedotjs&logoColor=white)
+![pnpm](https://img.shields.io/badge/pnpm-12-F69220?logo=pnpm&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-listo-2496ED?logo=docker&logoColor=white)
+![OpenAPI](https://img.shields.io/badge/OpenAPI-Swagger-85EA2D?logo=swagger&logoColor=black)
 
-## Project setup
+</div>
 
-```bash
-$ pnpm install
+---
+
+## ¿Qué es Bovigest?
+
+Bovigest es una app para llevar el control de fincas ganaderas: el terreno
+(fincas, parcelas, potreros), el ganado y su historia. Va a tener una versión
+web y una app para Android, y las dos hablan con esta API.
+
+Hoy el proyecto está en sus **cimientos**: la API ya corre en pruebas y en
+producción, con HTTPS, despliegue automático y documentación interactiva. Las
+funciones de la finca vienen encima de esto.
+
+## Arquitectura
+
+```mermaid
+flowchart LR
+    subgraph Clientes
+        APK["📱 App Android<br/>(en camino)"]
+        WEB["💻 Web<br/>(en camino)"]
+    end
+
+    GH["GitHub"]
+
+    subgraph Servidor["Servidor · Oracle Cloud (ARM)"]
+        DK["Dokploy<br/>construye y despliega"]
+        T["Traefik<br/>HTTPS"]
+        PROD["API · producción<br/>rama main"]
+        DEV["API · pruebas<br/>rama develop"]
+        DBP[("PostgreSQL<br/>producción")]
+        DBD[("PostgreSQL<br/>pruebas")]
+    end
+
+    APK -- HTTPS --> T
+    WEB -- HTTPS --> T
+    T --> PROD
+    T --> DEV
+    PROD -.-> DBP
+    DEV -.-> DBD
+    GH -- push --> DK
+    DK -.-> PROD
+    DK -.-> DEV
 ```
 
-## Compile and run the project
+- **La API es pública; la base de datos no.** Solo la API habla con
+  PostgreSQL, dentro del servidor.
+- **Cada rama es un entorno.** Un push a `develop` despliega pruebas; un push a
+  `main`, producción. Nadie despliega a mano.
+- **El mismo código en todos lados.** Lo que cambia entre entornos son las
+  variables, nunca el código.
+
+## Tecnologías
+
+| Pieza | Qué se usa |
+|---|---|
+| Lenguaje | TypeScript 6, en modo estricto |
+| Framework | NestJS 12, con módulos ESM |
+| Entorno | Node.js 26 |
+| Paquetes | pnpm 12, con la versión fija en `packageManager` |
+| Base de datos | PostgreSQL 18 |
+| Pruebas | Vitest y Supertest |
+| Documentación | OpenAPI con Swagger |
+| Contenedores | Docker en dos etapas; Docker Compose para la laptop |
+| Servidor | Dokploy y Traefik, con certificados de Let's Encrypt |
+
+## Empezar
+
+Necesitas **Node.js 26**, **pnpm 12** y **Docker**.
 
 ```bash
-# development
-$ pnpm run start
+git clone https://github.com/CSagasDev/chivos-api.git
+cd chivos-api
+pnpm install
 
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+docker compose up -d db   # un PostgreSQL solo para tu laptop
+pnpm start:dev            # la API, que se reinicia sola al guardar
 ```
 
-## Run tests
+Abre <http://localhost:3000>: te lleva a Swagger, donde puedes ver y probar
+cada ruta.
 
-```bash
-# unit tests
-$ pnpm run test
+¿Prefieres levantar todo como en el servidor? `docker compose up --build`
+construye la imagen de la API y la arranca junto con la base.
 
-# e2e tests
-$ pnpm run test:e2e
+## Comandos
 
-# test coverage
-$ pnpm run test:cov
+| Comando | Qué hace |
+|---|---|
+| `pnpm start:dev` | Arranca la API y la reinicia al guardar |
+| `pnpm build` | Compila TypeScript a JavaScript en `dist/` |
+| `pnpm start:prod` | Corre lo compilado |
+| `pnpm test` | Pruebas unitarias |
+| `pnpm test:e2e` | Pruebas de la API completa, por HTTP |
+| `pnpm test:cov` | Pruebas con cobertura |
+| `pnpm lint` | Revisa el código en busca de errores comunes |
+| `pnpm format` | Acomoda el formato con Prettier |
+
+## Rutas
+
+| Ruta | Qué contesta |
+|---|---|
+| `GET /health` | `{"status": "Ok"}` si la API está viva. Docker la consulta cada 30 segundos |
+| `GET /` | Con Swagger, lleva a `/docs`. Sin Swagger, una ficha con el nombre y la versión |
+| `GET /docs` | Swagger: la documentación interactiva |
+| `GET /docs-json` | El plano de la API en formato OpenAPI |
+
+## Variables de entorno
+
+| Variable | Para qué | Si no está |
+|---|---|---|
+| `PORT` | Puerto en el que escucha la API | `3000` |
+| `SWAGGER` | `true` enciende Swagger; cualquier otro valor lo apaga | Encendido fuera de Docker, apagado dentro |
+| `NODE_ENV` | `production` dentro de Docker; lo pone el `Dockerfile` | — |
+| `DATABASE_URL` | Conexión a PostgreSQL | Todavía no se usa |
+
+`docker-compose.yml` trae una contraseña a la vista (`chivos`) a propósito: solo
+abre la base de tu laptop, y solo desde `127.0.0.1`. Las contraseñas de verdad
+viven en el servidor, nunca en el repo.
+
+## Entornos
+
+| Entorno | Rama | Swagger | Dirección |
+|---|---|---|---|
+| Laptop | cualquiera | Encendido | `http://localhost:3000` |
+| Pruebas | `develop` | Encendido | No publicada |
+| Producción | `main` | Apagado | <https://bovigest-api.datosystems.dev> |
+
+## Cómo se trabaja
+
+```mermaid
+flowchart LR
+    F["feature/*"] -- pull request --> D["develop"]
+    D -- "pull request + etiqueta vX.Y.Z" --> M["main"]
+    D -. despliegue automático .-> P1(["Pruebas"])
+    M -. despliegue automático .-> P2(["Producción"])
 ```
 
-## Deployment
+1. Cada cambio nace en su propia rama `feature/<nombre>`, a partir de
+   `develop`.
+2. Entra a `develop` por pull request, y se prueba en el entorno de pruebas.
+3. Cuando `develop` está estable, pasa a `main` por pull request, con su
+   número de versión ([versionado semántico](https://semver.org/lang/es/)).
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## Estructura
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+```text
+chivos-api/
+├── src/
+│   ├── main.ts            # arranca la app: Swagger, la ruta / y el puerto
+│   ├── app.module.ts      # el módulo principal: solo junta los demás
+│   └── health/            # un módulo por funcionalidad
+├── test/                  # pruebas de la API completa
+├── Dockerfile             # la imagen, en dos etapas
+├── docker-compose.yml     # la API y PostgreSQL para la laptop
+└── pnpm-workspace.yaml    # qué dependencias pueden correr scripts al instalarse
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Versiones
 
-## Observability
+| Versión | Fecha | Qué trajo |
+|---|---|---|
+| [`v0.2.0`](https://github.com/CSagasDev/chivos-api/tree/v0.2.0) | 2026-11-18 | Swagger en pruebas, ficha de la API en producción y entorno local con Docker Compose |
+| [`v0.1.0`](https://github.com/CSagasDev/chivos-api/tree/v0.1.0) | 2026-11-17 | Ruta de salud, imagen de Docker y primer despliegue |
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
+## Lo que viene
 
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
+- [x] API en pruebas y producción, con HTTPS
+- [x] Despliegue automático por rama
+- [x] Documentación interactiva con Swagger
+- [ ] Conexión a PostgreSQL, con migraciones
+- [ ] Pruebas automáticas en cada pull request
+- [ ] Inicio de sesión, empresas y usuarios por invitación
+- [ ] Fincas y sus divisiones: parcelas, potreros, corrales…
+- [ ] Engorde: cada cabeza con su número, nombre y peso
+- [ ] Crianza: padres, madres y crías, razas, crecimiento y celo
+- [ ] Web y app para Android
 
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
+---
 
-To add it to this project, run this and approve the code it prints at [observe.nestjs.com/link](https://observe.nestjs.com/link) - signing up for free if you have no account:
+<div align="center">
 
-```bash
-$ npx @nestjs/observe link
-```
+Hecho en Guatemala 🇬🇹 por **DATO Systems Group**
 
-It installs `@nestjs/observe`, wires it into `AppModule` and `main.ts`, and writes the app key and secret into `.env`, which every `nest start` script (`start`, `start:dev`, `start:debug`) then loads. In production, set `OBSERVE_APP_KEY` and `OBSERVE_APP_SECRET` in the environment instead.
+<sub>© 2026 DATO Systems Group. Todos los derechos reservados: el código se puede
+ver, pero no es de uso libre.</sub>
 
-Or do it by hand:
-
-```bash
-$ pnpm install @nestjs/observe
-```
-
-Then follow the [setup guide](https://docs.nestjs.com/observability/sdk) - it takes a single import and an app key.
-
-The free plan needs no payment details and covers 300,000 events a month. You can also browse the [live demo](https://www.observe-demo.nestjs.com/dashboard) first - the whole dashboard over a busy service's data, with nothing to install.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observe](https://observe.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+</div>
